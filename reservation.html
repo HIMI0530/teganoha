@@ -695,12 +695,22 @@
       <div id="newPatientFields">
       <div class="form-row">
         <div class="form-group">
-          <label>お名前 <span class="badge badge-req">必須</span></label>
-          <input type="text" class="form-input" id="fname" placeholder="山田 花子" autocomplete="name">
+          <label>姓 <span class="badge badge-req">必須</span></label>
+          <input type="text" class="form-input" id="flastname" placeholder="山田" autocomplete="family-name">
         </div>
         <div class="form-group">
-          <label>フリガナ <span class="badge badge-req">必須</span></label>
-          <input type="text" class="form-input" id="fkana" placeholder="ヤマダ ハナコ">
+          <label>名 <span class="badge badge-req">必須</span></label>
+          <input type="text" class="form-input" id="ffirstname" placeholder="花子" autocomplete="given-name">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>フリガナ（セイ） <span class="badge badge-req">必須</span></label>
+          <input type="text" class="form-input" id="flastkana" placeholder="ヤマダ">
+        </div>
+        <div class="form-group">
+          <label>フリガナ（メイ） <span class="badge badge-req">必須</span></label>
+          <input type="text" class="form-input" id="ffirstkana" placeholder="ハナコ">
         </div>
       </div>
 
@@ -1142,18 +1152,22 @@ function onPatientNumChange() {
 function submitForm() {
   var patientNum = (document.getElementById('fpatientnum').value || '').trim().toUpperCase();
   var isReturning = patientNum.length > 0;
-  var name    = document.getElementById('fname').value.trim();
-  var kana    = document.getElementById('fkana').value.trim();
-  var tel     = document.getElementById('ftel').value.trim();
-  var address = document.getElementById('faddress').value.trim();
-  var birthday = getBirthdayISO();
-  var email   = document.getElementById('femail').value.trim();
+  var lastName    = document.getElementById('flastname').value.trim();
+  var firstName   = document.getElementById('ffirstname').value.trim();
+  var lastKana    = document.getElementById('flastkana').value.trim();
+  var firstKana   = document.getElementById('ffirstkana').value.trim();
+  var name        = lastName && firstName ? lastName + ' ' + firstName : (lastName || firstName);
+  var kana        = lastKana && firstKana ? lastKana + ' ' + firstKana : (lastKana || firstKana);
+  var tel         = document.getElementById('ftel').value.trim();
+  var address     = document.getElementById('faddress').value.trim();
+  var birthday    = getBirthdayISO();
+  var email       = document.getElementById('femail').value.trim();
   if (!email) {
     alert('メールアドレスを入力してください。（ご予約確認メールをお送りします）');
     return;
   }
-  if (!isReturning && (!name || !kana || !tel || !address)) {
-    alert('お名前・フリガナ・電話番号・ご住所は必須です。\n（診察券の患者番号をお持ちの方は患者番号のみでご予約いただけます）');
+  if (!isReturning && (!lastName || !firstName || !lastKana || !firstKana || !tel || !address)) {
+    alert('姓・名・フリガナ（セイ・メイ）・電話番号・ご住所は必須です。\n（診察券の患者番号をお持ちの方は患者番号のみでご予約いただけます）');
     return;
   }
   if (!isReturning && !birthday) {
@@ -1178,8 +1192,7 @@ function submitForm() {
     return;
   }
   var memoParts = [];
-  if (email) memoParts.push('Email: ' + email);
-  if (msg)   memoParts.push('症状・ご質問: ' + msg);
+  if (msg) memoParts.push(msg);
 
   var stored = JSON.parse(localStorage.getItem('teganoha_appointments') || '[]');
   var maxId  = stored.reduce(function(m, a){ return Math.max(m, a.id || 0); }, 100);
